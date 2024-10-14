@@ -67,7 +67,7 @@ class AuthWrapper extends StatelessWidget {
             }
           }
           // Show a loading indicator while fetching user data
-          return Scaffold(body: Center(child: CircularProgressIndicator()));
+          return const Scaffold(body: Center(child: CircularProgressIndicator()));
         },
       );
     }

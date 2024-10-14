@@ -1,10 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import '../models/message_model.dart';
 
 class ChatBubble extends StatelessWidget {
   final String message;
   final bool isCurrentUser;
+  final MessageType messageType;
+  final DateTime timestamp;
 
-  ChatBubble({required this.message, required this.isCurrentUser});
+  ChatBubble({
+    required this.message,
+    required this.isCurrentUser,
+    required this.messageType,
+    required this.timestamp,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -17,57 +26,54 @@ class ChatBubble extends StatelessWidget {
           color: isCurrentUser ? Colors.blue : Colors.grey[300],
           borderRadius: BorderRadius.circular(12),
         ),
-        child: Text(
-          message,
-          style: TextStyle(
-            color: isCurrentUser ? Colors.white : Colors.black,
-          ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildMessageContent(),
+            SizedBox(height: 4),
+            Text(
+              DateFormat('HH:mm').format(timestamp),
+              style: TextStyle(
+                color: isCurrentUser ? Colors.white70 : Colors.black54,
+                fontSize: 10,
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
-}
 
-class MessageInput extends StatefulWidget {
-  final Function(String) onSendMessage;
-
-  MessageInput({required this.onSendMessage});
-
-  @override
-  _MessageInputState createState() => _MessageInputState();
-}
-
-class _MessageInputState extends State<MessageInput> {
-  final TextEditingController _controller = TextEditingController();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: _controller,
-              decoration: InputDecoration(
-                hintText: 'Type a message...',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(24),
-                ),
+  Widget _buildMessageContent() {
+    switch (messageType) {
+      case MessageType.text:
+        return Text(
+          message,
+          style: TextStyle(
+            color: isCurrentUser ? Colors.white : Colors.black,
+          ),
+        );
+      case MessageType.image:
+        return Image.network(
+          message,
+          height: 200,
+          width: 200,
+          fit: BoxFit.cover,
+        );
+      case MessageType.file:
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.attach_file, color: isCurrentUser ? Colors.white : Colors.black),
+            SizedBox(width: 8),
+            Text(
+              'File attachment',
+              style: TextStyle(
+                color: isCurrentUser ? Colors.white : Colors.black,
               ),
             ),
-          ),
-          IconButton(
-            icon: Icon(Icons.send),
-            onPressed: () {
-              if (_controller.text.isNotEmpty) {
-                widget.onSendMessage(_controller.text);
-                _controller.clear();
-              }
-            },
-          ),
-        ],
-      ),
-    );
+          ],
+        );
+    }
   }
 }

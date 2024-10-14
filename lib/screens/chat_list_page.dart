@@ -9,16 +9,16 @@ import '../widgets/user_avatar.dart';  // Add this import
 class ChatListPage extends StatelessWidget {
   final AppUser currentUser;
 
-  ChatListPage({required this.currentUser});
+  const ChatListPage({super.key, required this.currentUser});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Chats'),
+        title: const Text('Chats'),
         actions: [
           IconButton(
-            icon: Icon(Icons.search),
+            icon: const Icon(Icons.search),
             onPressed: () {
               Navigator.push(
                 context,
@@ -34,15 +34,15 @@ class ChatListPage extends StatelessWidget {
         stream: DatabaseService().getUserChats(currentUser.id),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return Center(child: Text('Something went wrong'));
+            return const Center(child: Text('Something went wrong'));
           }
 
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
 
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return Center(child: Text('No chats yet'));
+            return const Center(child: Text('No chats yet'));
           }
 
           return ListView(
@@ -55,7 +55,7 @@ class ChatListPage extends StatelessWidget {
                 future: DatabaseService().getUser(otherUserId),
                 builder: (context, userSnapshot) {
                   if (userSnapshot.connectionState == ConnectionState.waiting) {
-                    return ListTile(title: Text('Loading...'));
+                    return const ListTile(title: Text('Loading...'));
                   }
 
                   AppUser? otherUser = userSnapshot.data;

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/user_model.dart';
+import '../models/message_model.dart';
 
 class DatabaseService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -64,16 +65,17 @@ class DatabaseService {
     }
   }
 
-  Future<void> sendMessage(String chatId, String senderId, String message) async {
+  Future<void> sendMessage(String chatId, String senderId, String content, {MessageType type = MessageType.text}) async {
     try {
       await _db.collection('chats').doc(chatId).collection('messages').add({
         'senderId': senderId,
-        'message': message,
+        'content': content,
         'timestamp': FieldValue.serverTimestamp(),
+        'type': type.toString().split('.').last,
       });
 
       await _db.collection('chats').doc(chatId).update({
-        'lastMessage': message,
+        'lastMessage': content,
         'lastMessageTime': FieldValue.serverTimestamp(),
       });
     } catch (e) {

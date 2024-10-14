@@ -1,3 +1,5 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:chatapp/screens/auth/login_page.dart';
@@ -7,7 +9,7 @@ import 'package:chatapp/screens/chat_list_page.dart';
 
 class HomePage extends StatefulWidget {
   final AppUser user;
-  HomePage({required this.user});
+  const HomePage({super.key, required this.user});
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -33,7 +35,7 @@ class _HomePageState extends State<HomePage> {
             _selectedIndex = index;
           });
         },
-        items: [
+        items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.chat),
             label: 'Chats',

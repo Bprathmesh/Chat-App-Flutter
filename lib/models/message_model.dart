@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+enum MessageType { text, image, file }
+
 class Message {
   final String id;
   final String senderId;
@@ -37,10 +39,4 @@ class Message {
       'type': type.toString().split('.').last,
     };
   }
-}
-
-enum MessageType {
-  text,
-  image,
-  file,
 }

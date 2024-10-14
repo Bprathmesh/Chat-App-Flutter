@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously, avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
@@ -98,7 +100,7 @@ class _LoginPageState extends State<LoginPage> {
         print('Firebase Auth Error: ${e.code} - $errorMessage');
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('An unexpected error occurred. Please try again.')),
+          const SnackBar(content: Text('An unexpected error occurred. Please try again.')),
         );
         print('Unexpected Error: $e');
       } finally {
@@ -118,14 +120,14 @@ class _LoginPageState extends State<LoginPage> {
         title: Text(_isLogin ? 'Login' : 'Sign Up'),
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               TextFormField(
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Email',
                   border: OutlineInputBorder(),
                 ),
@@ -141,9 +143,9 @@ class _LoginPageState extends State<LoginPage> {
                 },
                 onSaved: (value) => _email = value!.trim(),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               TextFormField(
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Password',
                   border: OutlineInputBorder(),
                 ),
@@ -159,17 +161,17 @@ class _LoginPageState extends State<LoginPage> {
                 },
                 onSaved: (value) => _password = value!,
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               _isLoading
-                  ? CircularProgressIndicator()
+                  ? const CircularProgressIndicator()
                   : ElevatedButton(
                       onPressed: _submitForm,
                       child: Text(_isLogin ? 'Login' : 'Sign Up'),
                       style: ElevatedButton.styleFrom(
-                        minimumSize: Size(double.infinity, 50),
+                        minimumSize: const Size(double.infinity, 50),
                       ),
                     ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               TextButton(
                 onPressed: () {
                   setState(() {
