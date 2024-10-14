@@ -4,6 +4,7 @@ import '../models/user_model.dart';
 import '../services/database_service.dart';
 import '../widgets/chat_bubble.dart';
 import '../widgets/message_input.dart';
+import '../widgets/user_avatar.dart';  // Add this import
 
 class ChatRoomPage extends StatelessWidget {
   final String chatId;
@@ -20,7 +21,17 @@ class ChatRoomPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(otherUser.name),
+        title: Row(
+          children: [
+            UserAvatar(  // Add UserAvatar here
+              name: otherUser.name,
+              imageUrl: otherUser.profilePictureUrl,
+              size: 40,
+            ),
+            SizedBox(width: 8),
+            Text(otherUser.name),
+          ],
+        ),
       ),
       body: Column(
         children: [

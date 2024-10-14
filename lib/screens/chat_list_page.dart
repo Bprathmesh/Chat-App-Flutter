@@ -4,6 +4,7 @@ import '../models/user_model.dart';
 import '../services/database_service.dart';
 import 'chat_room_page.dart';
 import 'user_search_page.dart';
+import '../widgets/user_avatar.dart';  // Add this import
 
 class ChatListPage extends StatelessWidget {
   final AppUser currentUser;
@@ -55,18 +56,14 @@ class ChatListPage extends StatelessWidget {
                 builder: (context, userSnapshot) {
                   if (userSnapshot.connectionState == ConnectionState.waiting) {
                     return ListTile(title: Text('Loading...'));
-                    }
+                  }
 
                   AppUser? otherUser = userSnapshot.data;
 
                   return ListTile(
-                    leading: CircleAvatar(
-                      backgroundImage: otherUser?.profilePictureUrl != null
-                          ? NetworkImage(otherUser!.profilePictureUrl!)
-                          : null,
-                      child: otherUser?.profilePictureUrl == null
-                          ? Text(otherUser?.name[0] ?? '?')
-                          : null,
+                    leading: UserAvatar(  // Use UserAvatar here
+                      name: otherUser?.name ?? 'Unknown',
+                      imageUrl: otherUser?.profilePictureUrl,
                     ),
                     title: Text(otherUser?.name ?? 'Unknown User'),
                     subtitle: Text(data['lastMessage'] ?? 'No messages yet'),

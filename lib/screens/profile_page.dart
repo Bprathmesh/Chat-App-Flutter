@@ -6,6 +6,7 @@ import '../services/auth_service.dart';
 import '../services/storage_service.dart';
 import '../services/database_service.dart';
 import 'auth/login_page.dart';
+import '../widgets/user_avatar.dart';  // Add this import
 
 class ProfilePage extends StatefulWidget {
   final AppUser user;
@@ -93,14 +94,10 @@ class _ProfilePageState extends State<ProfilePage> {
             children: [
               GestureDetector(
                 onTap: _uploadProfilePicture,
-                child: CircleAvatar(
-                  radius: 50,
-                  backgroundImage: widget.user.profilePictureUrl != null
-                      ? NetworkImage(widget.user.profilePictureUrl!)
-                      : null,
-                  child: widget.user.profilePictureUrl == null
-                      ? const Icon(Icons.person, size: 50)
-                      : null,
+                child: UserAvatar(  // Use UserAvatar here
+                  name: widget.user.name,
+                  imageUrl: widget.user.profilePictureUrl,
+                  size: 120,
                 ),
               ),
               const SizedBox(height: 16),
