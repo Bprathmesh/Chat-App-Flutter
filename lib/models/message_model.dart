@@ -1,12 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-enum MessageType { text, image, file }
+enum MessageType { text, image, file, voice }
 
 class Message {
   final String id;
   final String senderId;
   final String content;
-  final DateTime? timestamp;  // Make this nullable
+  final DateTime? timestamp;
   final MessageType type;
   final bool isRead;
 
@@ -14,7 +14,7 @@ class Message {
     required this.id,
     required this.senderId,
     required this.content,
-    this.timestamp,  // Make this optional
+    this.timestamp,
     required this.type,
     required this.isRead,
   });
@@ -27,7 +27,7 @@ class Message {
       content: data['content'] ?? '',
       timestamp: data['timestamp'] != null 
           ? (data['timestamp'] as Timestamp).toDate() 
-          : null,  // Handle null timestamp
+          : null,
       type: MessageType.values.firstWhere(
         (e) => e.toString() == 'MessageType.${data['type']}',
         orElse: () => MessageType.text,

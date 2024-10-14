@@ -1,20 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:audioplayers/audioplayers.dart';
 import '../models/message_model.dart';
 
 class ChatBubble extends StatelessWidget {
   final String message;
   final bool isCurrentUser;
   final MessageType messageType;
-  final DateTime? timestamp;  // Make this nullable
+  final DateTime? timestamp;
   final bool isRead;
+  final VoidCallback? onDelete;
 
   ChatBubble({
     required this.message,
     required this.isCurrentUser,
     required this.messageType,
-    this.timestamp,  // Make this optional
+    this.timestamp,
     required this.isRead,
+    this.onDelete,
   });
 
   @override
@@ -36,7 +39,7 @@ class ChatBubble extends StatelessWidget {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (timestamp != null)  // Only show timestamp if it's not null
+                if (timestamp != null)
                   Text(
                     DateFormat('HH:mm').format(timestamp!),
                     style: TextStyle(
@@ -51,6 +54,12 @@ class ChatBubble extends StatelessWidget {
                     size: 14,
                     color: isRead ? Colors.blue[100] : Colors.white70,
                   ),
+                if (isCurrentUser && onDelete != null)
+                  IconButton(
+                    icon: Icon(Icons.delete, size: 16),
+                    color: Colors.white70,
+                    onPressed: onDelete,
+                  ),
               ],
             ),
           ],
@@ -58,6 +67,7 @@ class ChatBubble extends StatelessWidget {
       ),
     );
   }
+
   Widget _buildMessageContent() {
     switch (messageType) {
       case MessageType.text:
@@ -88,6 +98,55 @@ class ChatBubble extends StatelessWidget {
             ),
           ],
         );
+      case MessageType.voice:
+        return AudioPlayerWidget(audioUrl: message);
+      default:
+        return Text('Unsupported message type');
     }
+  }
+}
+
+class AudioPlayerWidget extends StatefulWidget {
+  final String audioUrl;
+
+  AudioPlayerWidget({required this.audioUrl});
+
+  @override
+  _AudioPlayerWidgetState createState() => _AudioPlayerWidgetState();
+}
+
+class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
+  final AudioPlayer _audioPlayer = AudioPlayer();
+  bool _isPlaying = false;
+
+  @override
+  void dispose() {
+    _audioPlayer.dispose();
+    super.dispose();
+  }
+
+  void _togglePlayPause() async {
+    if (_isPlaying) {
+      await _audioPlayer.pause();
+    } else {
+      await _audioPlayer.play(UrlSource(widget.audioUrl));
+    }
+    setState(() {
+      _isPlaying = !_isPlaying;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton(
+          icon: Icon(_isPlaying ? Icons.pause : Icons.play_arrow),
+          onPressed: _togglePlayPause,
+        ),
+        Text('Voice Message'),
+      ],
+    );
   }
 }

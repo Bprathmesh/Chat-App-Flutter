@@ -12,11 +12,12 @@ class ChatRoomPage extends StatefulWidget {
   final AppUser currentUser;
   final AppUser otherUser;
 
-  const ChatRoomPage({super.key, 
+  const ChatRoomPage({
+    Key? key,
     required this.chatId,
     required this.currentUser,
     required this.otherUser,
-  });
+  }) : super(key: key);
 
   @override
   _ChatRoomPageState createState() => _ChatRoomPageState();
@@ -34,11 +35,27 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
   void _markMessagesAsRead() {
     _databaseService.markMessagesAsRead(widget.chatId, widget.currentUser.id).catchError((error) {
       print('Error marking messages as read: $error');
-      // Optionally show a snackbar or some other UI indication that there was an error
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to update message status')),
       );
     });
+  }
+
+  Widget _buildTypingIndicator() {
+    return StreamBuilder<List<String>>(
+      stream: _databaseService.getTypingUsers(widget.chatId),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData || snapshot.data!.isEmpty) return SizedBox.shrink();
+        final typingUsers = snapshot.data!;
+        if (typingUsers.contains(widget.otherUser.id)) {
+          return Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text('${widget.otherUser.name} is typing...'),
+          );
+        }
+        return SizedBox.shrink();
+      },
+    );
   }
 
   @override
@@ -52,13 +69,13 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
               imageUrl: widget.otherUser.profilePictureUrl,
               size: 40,
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(widget.otherUser.name, style: const TextStyle(fontSize: 16)),
-                  const Text('Online', style: TextStyle(fontSize: 12)),
+                  Text(widget.otherUser.name, style: TextStyle(fontSize: 16)),
+                  Text('Online', style: TextStyle(fontSize: 12)),
                 ],
               ),
             ),
@@ -72,13 +89,13 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
               stream: _databaseService.getChatMessages(widget.chatId),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
-                  return const Center(child: Text('Something went wrong'));
+                  return Center(child: Text('Something went wrong'));
                 }
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
+                  return Center(child: CircularProgressIndicator());
                 }
                 if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return const Center(child: Text('No messages yet'));
+                  return Center(child: Text('No messages yet'));
                 }
                 List<Message> messages = snapshot.data!.docs
                     .map((doc) => Message.fromDocument(doc))
@@ -95,12 +112,14 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                       messageType: message.type,
                       timestamp: message.timestamp,
                       isRead: message.isRead,
+                      onDelete: isCurrentUser ? () => _deleteMessage(message.id) : null,
                     );
                   },
                 );
               },
             ),
           ),
+          _buildTypingIndicator(),
           MessageInput(
             onSendMessage: (String message, MessageType type) {
               _databaseService.sendMessage(
@@ -110,10 +129,28 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                 type: type,
               );
             },
+            onTypingStatusChanged: (bool isTyping) {
+              _databaseService.setTypingStatus(
+                widget.chatId,
+                widget.currentUser.id,
+                isTyping,
+              );
+            },
             chatId: widget.chatId,
+            currentUser: widget.currentUser,
           ),
         ],
       ),
     );
+  }
+
+  void _deleteMessage(String messageId) async {
+    try {
+      await _databaseService.deleteMessage(widget.chatId, messageId);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to delete message')),
+      );
+    }
   }
 }

@@ -57,6 +57,7 @@ class DatabaseService {
         'participants': [userId1, userId2],
         'lastMessage': null,
         'lastMessageTime': null,
+        'typingUsers': [],
       });
       return chatRef.id;
     } catch (e) {
@@ -77,7 +78,7 @@ class DatabaseService {
       });
 
       await _db.collection('chats').doc(chatId).update({
-        'lastMessage': content,
+        'lastMessage': type == MessageType.text ? content : '${type.toString().split('.').last} message',
         'lastMessageTime': timestamp,
         'lastMessageSenderId': senderId,
         'unreadCount': FieldValue.increment(1),
@@ -87,9 +88,9 @@ class DatabaseService {
       throw Exception('Failed to send message');
     }
   }
- Future<void> markMessagesAsRead(String chatId, String userId) async {
+
+  Future<void> markMessagesAsRead(String chatId, String userId) async {
     try {
-      // Get all unread messages not sent by the current user
       QuerySnapshot unreadMessages = await _db
           .collection('chats')
           .doc(chatId)
@@ -98,24 +99,20 @@ class DatabaseService {
           .where('senderId', isNotEqualTo: userId)
           .get();
 
-      // Mark each message as read
       WriteBatch batch = _db.batch();
       unreadMessages.docs.forEach((doc) {
         batch.update(doc.reference, {'isRead': true});
       });
       await batch.commit();
 
-      // Reset unread count
       await _db.collection('chats').doc(chatId).update({
         'unreadCount': 0,
       });
     } catch (e) {
       print('Error marking messages as read: $e');
-      // Instead of throwing an exception, we'll just print the error
-      // This allows the app to continue functioning even if this operation fails
     }
   }
- 
+
   Stream<QuerySnapshot> getChatMessages(String chatId) {
     return _db
         .collection('chats')
@@ -125,7 +122,6 @@ class DatabaseService {
         .snapshots();
   }
 
-  
   Future<void> updateUserProfile(String userId, String name, String email) async {
     try {
       await _db.collection('users').doc(userId).update({
@@ -146,6 +142,35 @@ class DatabaseService {
     } catch (e) {
       print('Error updating profile picture: $e');
       throw Exception('Failed to update profile picture');
+    }
+  }
+
+  Future<void> setTypingStatus(String chatId, String userId, bool isTyping) async {
+    try {
+      await _db.collection('chats').doc(chatId).update({
+        'typingUsers': isTyping
+            ? FieldValue.arrayUnion([userId])
+            : FieldValue.arrayRemove([userId])
+      });
+    } catch (e) {
+      print('Error setting typing status: $e');
+    }
+  }
+
+  Stream<List<String>> getTypingUsers(String chatId) {
+    return _db.collection('chats').doc(chatId).snapshots().map((snapshot) {
+      if (!snapshot.exists) return [];
+      final data = snapshot.data() as Map<String, dynamic>;
+      return List<String>.from(data['typingUsers'] ?? []);
+    });
+  }
+
+  Future<void> deleteMessage(String chatId, String messageId) async {
+    try {
+      await _db.collection('chats').doc(chatId).collection('messages').doc(messageId).delete();
+    } catch (e) {
+      print('Error deleting message: $e');
+      throw Exception('Failed to delete message');
     }
   }
 }
