@@ -49,7 +49,7 @@ class _MessageInputState extends State<MessageInput> {
       } catch (e) {
         print('Error uploading image: $e');
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to upload image. Please try again.')),
+          SnackBar(content: Text('Failed to upload image. Please try again.')),
         );
       }
     }
@@ -58,11 +58,11 @@ class _MessageInputState extends State<MessageInput> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      padding: EdgeInsets.symmetric(horizontal: 8),
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.attach_file),
+            icon: Icon(Icons.attach_file),
             onPressed: _sendImage,
           ),
           Expanded(
@@ -77,7 +77,7 @@ class _MessageInputState extends State<MessageInput> {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.send),
+            icon: Icon(Icons.send),
             onPressed: _sendMessage,
           ),
         ],

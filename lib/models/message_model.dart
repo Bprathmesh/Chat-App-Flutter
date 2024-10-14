@@ -6,15 +6,17 @@ class Message {
   final String id;
   final String senderId;
   final String content;
-  final DateTime timestamp;
+  final DateTime? timestamp;  // Make this nullable
   final MessageType type;
+  final bool isRead;
 
   Message({
     required this.id,
     required this.senderId,
     required this.content,
-    required this.timestamp,
+    this.timestamp,  // Make this optional
     required this.type,
+    required this.isRead,
   });
 
   factory Message.fromDocument(DocumentSnapshot doc) {
@@ -23,11 +25,14 @@ class Message {
       id: doc.id,
       senderId: data['senderId'] ?? '',
       content: data['content'] ?? '',
-      timestamp: (data['timestamp'] as Timestamp).toDate(),
+      timestamp: data['timestamp'] != null 
+          ? (data['timestamp'] as Timestamp).toDate() 
+          : null,  // Handle null timestamp
       type: MessageType.values.firstWhere(
         (e) => e.toString() == 'MessageType.${data['type']}',
         orElse: () => MessageType.text,
       ),
+      isRead: data['isRead'] ?? false,
     );
   }
 
@@ -35,8 +40,9 @@ class Message {
     return {
       'senderId': senderId,
       'content': content,
-      'timestamp': Timestamp.fromDate(timestamp),
+      'timestamp': timestamp != null ? Timestamp.fromDate(timestamp!) : null,
       'type': type.toString().split('.').last,
+      'isRead': isRead,
     };
   }
 }

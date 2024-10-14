@@ -6,13 +6,15 @@ class ChatBubble extends StatelessWidget {
   final String message;
   final bool isCurrentUser;
   final MessageType messageType;
-  final DateTime timestamp;
+  final DateTime? timestamp;  // Make this nullable
+  final bool isRead;
 
   ChatBubble({
     required this.message,
     required this.isCurrentUser,
     required this.messageType,
-    required this.timestamp,
+    this.timestamp,  // Make this optional
+    required this.isRead,
   });
 
   @override
@@ -27,23 +29,35 @@ class ChatBubble extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             _buildMessageContent(),
             SizedBox(height: 4),
-            Text(
-              DateFormat('HH:mm').format(timestamp),
-              style: TextStyle(
-                color: isCurrentUser ? Colors.white70 : Colors.black54,
-                fontSize: 10,
-              ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (timestamp != null)  // Only show timestamp if it's not null
+                  Text(
+                    DateFormat('HH:mm').format(timestamp!),
+                    style: TextStyle(
+                      color: isCurrentUser ? Colors.white70 : Colors.black54,
+                      fontSize: 10,
+                    ),
+                  ),
+                SizedBox(width: 4),
+                if (isCurrentUser)
+                  Icon(
+                    isRead ? Icons.done_all : Icons.done,
+                    size: 14,
+                    color: isRead ? Colors.blue[100] : Colors.white70,
+                  ),
+              ],
             ),
           ],
         ),
       ),
     );
   }
-
   Widget _buildMessageContent() {
     switch (messageType) {
       case MessageType.text:
@@ -65,7 +79,7 @@ class ChatBubble extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.attach_file, color: isCurrentUser ? Colors.white : Colors.black),
-            SizedBox(width: 8),
+            const SizedBox(width: 8),
             Text(
               'File attachment',
               style: TextStyle(
