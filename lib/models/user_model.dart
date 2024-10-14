@@ -1,30 +1,49 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-class AppUser {  // Changed from User to AppUser
+
+class AppUser {
   final String id;
   final String name;
   final String email;
+  String? profilePictureUrl;
   final DateTime createdAt;
+
   AppUser({
     required this.id,
     required this.name,
     required this.email,
+    this.profilePictureUrl,
     required this.createdAt,
   });
-  // Create an AppUser instance from a Firestore document
+
   factory AppUser.fromDocument(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
     return AppUser(
       id: doc.id,
       name: data['name'] ?? '',
       email: data['email'] ?? '',
+      profilePictureUrl: data['profilePictureUrl'],
       createdAt: (data['createdAt'] as Timestamp).toDate(),
     );
   }
-  // Convert AppUser instance to a Map for Firestore
+
+  factory AppUser.newUser({
+    required String id,
+    required String name,
+    required String email,
+  }) {
+    return AppUser(
+      id: id,
+      name: name,
+      email: email,
+      createdAt: DateTime.now(),
+    );
+  }
+
   Map<String, dynamic> toMap() {
     return {
       'name': name,
       'email': email,
+      'profilePictureUrl': profilePictureUrl,
       'createdAt': Timestamp.fromDate(createdAt),
     };
   }
